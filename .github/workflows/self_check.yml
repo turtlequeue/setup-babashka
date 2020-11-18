@@ -1,0 +1,20 @@
+# name: Self check
+
+# on: [push]
+
+# jobs:
+#   check:
+#     runs-on: ${{ matrix.os }}
+#     strategy:
+#       matrix:
+#         os: [ubuntu-latest, ubuntu-18.04, macos-latest, windows-latest]
+#         babashka-version: [0.2.3]
+#     steps:
+#       - name: Setup Babashka
+#         id: setup-babashka
+#         uses: turtlequeue/setup-babashka@v1.0.3
+#         with:
+#           babashka-version: ${{ matrix.babashka-version }}
+
+#       - name: Check if bb runs fine
+#         run: bb --version
