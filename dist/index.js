@@ -5363,7 +5363,7 @@ function getBabashka(version) {
             yield io.mkdirP(tmpPath);
             core.info('temporary directory ' + tmpPath);
             const installerFile = yield tc.downloadTool("https://raw.githubusercontent.com/borkdude/babashka/master/install");
-            core.info('INSTALLER FILE ' + installerFile);
+            core.info(`Downloaded installer file ${installerFile}`);
             yield exec.exec('bash', [installerFile, "--dir", tmpPath, "--version", version]);
             core.info(`babashka installed to ${tmpPath}`);
             toolPath = yield tc.cacheDir(tmpPath, 'Babashka', version, os.arch());
@@ -5371,13 +5371,20 @@ function getBabashka(version) {
             core.addPath(toolPath);
         }
         else {
+            //throw (new Error("Windows not supported, PR welcome. Installing using https://github.com/littleli/scoop-clojure should be possible. See my attempt at https://github.com/turtlequeue/setup-babashka/tree/feature/windows"))
             // windows - PR welcome
+            //
             // https://scoop.sh/
             // https://github.com/littleli/scoop-clojure
-            core.info(`Windows not supported, PR welcome. Installing using https://github.com/littleli/scoop-clojure should be possible.`);
-            throw (new Error("Windows not supported, PR welcome. Installing using https://github.com/littleli/scoop-clojure should be possible."));
-            // await exec.exec('iwr', ["-useb", "get.scoop.sh", "|", "iex"])
-            // await exec.exec('scoop', ["install", "babashka"])
+            // https://github.com/actions/toolkit/blob/2bf7365352507ee52b4017790934cf9cefabc5f4/packages/exec/src/toolrunner.ts#L110
+            // https://superuser.com/questions/1080239/run-powershell-command-from-cmd
+            // https://stackoverflow.com/a/61219838/1327651
+            //
+            // attempt below
+            yield exec.exec('powershell', ["-command", "Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')"]);
+            // fails below
+            // maybe need powershell v5 as written there: https://scoop.sh/
+            yield exec.exec('scoop', ['install', 'babashka']);
         }
     });
 }
