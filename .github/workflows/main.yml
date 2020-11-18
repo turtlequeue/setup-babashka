@@ -1,0 +1,15 @@
+name: Simple example of using the babashka action
+
+on: [push]
+
+jobs:
+  simple:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Babashka
+        uses: turtlequeue/setup-babashka@v1
+        with:
+          babashka-version: 0.2.3
+
+      - name: Check bb runs
+        run: bb --version
