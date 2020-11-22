@@ -74,11 +74,13 @@ export async function getBabashka(version: string): Promise<void> {
     // maybe need powershell v5 as written there: https://scoop.sh/
     // https://docs.github.com/en/free-pro-team@latest/actions/reference/workflow-syntax-for-github-actions#jobsjob_idstepsrun
     // https://github.community/t/use-runas-to-run-cmd-exe-shell-on-windows-to-run-command-as-non-admin-user/142362//
-
-    var res = await exec.exec('C:\\windows\\system32\\cmd.exe', ["/D", "/E:ON", "/V:OFF", "/S", "/C", 'CALL "DIR"'])
-    core.info('RES' +  res)
-    res =await exec.exec('C:\\windows\\system32\\cmd.exe', ["/D", "/E:ON", "/V:OFF", "/S", "/C", 'CALL "scoop install babashka"'])
-    core.info('RES' + res)
+    // https://github.com/lukesampson/scoop/blob/master/bin/scoop.ps1
+    var res = await exec.exec('C:\\windows\\system32\\cmd.exe', ["/D", "/E:ON", "/V:OFF", "/S", "/C", 'CALL DIR'])
+    core.info('RES ' +  res)
+    var res = await exec.exec('C:\\windows\\system32\\cmd.exe', ["/D", "/E:ON", "/V:OFF", "/S", "/C", 'CALL DIR /S /B ~\\scoop\\shims'])
+    core.info('RES ' +  res)
+    res =await exec.exec('C:\\windows\\system32\\cmd.exe', ["/D", "/E:ON", "/V:OFF", "/S", "/C", 'CALL scoop install babashka'])
+    core.info('RES ' + res)
 
     // await exec.exec('scoop', ['install', 'babashka'])
 
