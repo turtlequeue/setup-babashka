@@ -4,7 +4,6 @@ import * as io from '@actions/io'
 import * as tc from '@actions/tool-cache'
 import * as path from 'path'
 import * as os from 'os'
-import fs from 'fs'
 import { v4 as uuidv4 } from 'uuid';
 import { ok } from 'assert'
 
@@ -67,10 +66,15 @@ export async function getBabashka(version: string): Promise<void> {
         //
         // attempt below
 
+        // const dotnetVersion = core.getInput('dotnet-version', { required: true });
+        // const powerShellVersion = core.getInput('powershell-version', { required: true });
+
         await exec.exec('powershell', ["-command", "Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')"])
         // fails below
         // maybe need powershell v5 as written there: https://scoop.sh/
-        await exec.exec('scoop', ['install', 'babashka'])
+         await exec.exec('powershell', ["-command", "scoop install babashka"])
+
+        // await exec.exec('scoop', ['install', 'babashka'])
 
     }
 
