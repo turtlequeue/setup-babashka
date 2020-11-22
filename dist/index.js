@@ -5381,10 +5381,18 @@ function getBabashka(version) {
             // https://stackoverflow.com/a/61219838/1327651
             //
             // attempt below
+            // const dotnetVersion = core.getInput('dotnet-version', { required: true });
+            // const powerShellVersion = core.getInput('powershell-version', { required: true });
             yield exec.exec('powershell', ["-command", "Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')"]);
             // fails below
             // maybe need powershell v5 as written there: https://scoop.sh/
-            yield exec.exec('scoop', ['install', 'babashka']);
+            // https://docs.github.com/en/free-pro-team@latest/actions/reference/workflow-syntax-for-github-actions#jobsjob_idstepsrun
+            // https://github.community/t/use-runas-to-run-cmd-exe-shell-on-windows-to-run-command-as-non-admin-user/142362//
+            var res = yield exec.exec('C:\\windows\\system32\\cmd.exe', ["/D", "/E:ON", "/V:OFF", "/S", "/C", 'CALL "DIR"']);
+            core.info('RES' + res);
+            res = yield exec.exec('C:\\windows\\system32\\cmd.exe', ["/D", "/E:ON", "/V:OFF", "/S", "/C", 'CALL "scoop install babashka"']);
+            core.info('RES' + res);
+            // await exec.exec('scoop', ['install', 'babashka'])
         }
     });
 }

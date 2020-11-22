@@ -24,10 +24,17 @@ jobs:
 
 # Development
 
+```
 nvm use
 yarn install
 yarn package
+```
 
+```
+git addm
+git cia --no-edit
+yarn package && git addm && git cia --no-edit &&  git push -f
+```
 
 # License
 Copyright © 2020 Turtlequeue Ltd
