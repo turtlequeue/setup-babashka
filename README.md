@@ -14,9 +14,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Setup Babashka
-        uses: turtlequeue/setup-babashka@master
+        uses: turtlequeue/setup-babashka@v1.1
         with:
-          babashka-version: 0.2.3
+          babashka-version: 0.2.12
 
       - name: Check bb runs
         run: bb --version
@@ -24,12 +24,13 @@ jobs:
 
 # Development
 
+```
 nvm use
 yarn install
 yarn package
-
+```
 
 # License
-Copyright © 2020 Turtlequeue Ltd
+Copyright © 2021 Turtlequeue Ltd
 
 Distributed under the EPL License. See LICENSE.

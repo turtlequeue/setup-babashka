@@ -39,7 +39,7 @@ export async function getBabashka(version: string): Promise<void> {
         core.info('temporary directory ' + tmpPath)
 
         const installerFile = await tc.downloadTool("https://raw.githubusercontent.com/borkdude/babashka/master/install")
-        core.info('INSTALLER FILE ' + installerFile)
+        core.info(`Downloaded installer file ${installerFile}`)
 
         await exec.exec('bash', [installerFile, "--dir", tmpPath, "--version", version])
 
