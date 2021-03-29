@@ -5377,7 +5377,8 @@ function getBabashka(version) {
                 'scoop', 'bucket', 'add', 'extras', ';',
                 'scoop', 'install', 'babashka', '--independent', ';',
                 'scoop', 'help', ';',
-                'scoop', 'info', 'babashka', ';']);
+                'scoop', 'info', 'babashka', ';',
+                'scoop', 'prefix', 'babashka', ';']);
             // TODO exact version ?
             yield exec.exec('echo', ['$HOME\\scoop\\shims', '|', 'Out-File', '-FilePath', '$env:GITHUB_PATH', '-Encoding', 'utf-8', '-Append']);
             // https://github.com/littleli/scoop-clojure/blob/f44b1696884a41f92c5dc85381eea4f5e01824b8/bucket/babashka.json#L13

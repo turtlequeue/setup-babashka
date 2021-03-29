@@ -62,7 +62,8 @@ export async function getBabashka(version: string): Promise<void> {
                                    'scoop', 'bucket', 'add', 'extras', ';',
                                    'scoop', 'install', 'babashka', '--independent', ';',
                                    'scoop', 'help', ';',
-                                   'scoop', 'info', 'babashka', ';']);
+                                   'scoop', 'info', 'babashka', ';',
+                                   'scoop', 'prefix', 'babashka', ';']);
     // TODO exact version ?
     await exec.exec('echo', ['$HOME\\scoop\\shims', '|', 'Out-File', '-FilePath', '$env:GITHUB_PATH', '-Encoding', 'utf-8', '-Append'])
 
