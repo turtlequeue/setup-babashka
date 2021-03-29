@@ -1,6 +1,6 @@
 # setup-babashka
 
-This action sets up Babashka environment for using in GitHub Actions.
+This action sets up [Babashka](https://github.com/babashka/babashka) environment for using in GitHub Actions.
 
 # Usage
 
@@ -16,7 +16,7 @@ jobs:
       - name: Setup Babashka
         uses: turtlequeue/setup-babashka@v1.1
         with:
-          babashka-version: 0.2.12
+          babashka-version: 0.3.0
 
       - name: Check bb runs
         run: bb --version
