@@ -58,27 +58,28 @@ export async function getBabashka(version: string): Promise<void> {
     core.info(`Windows detected, setting up babashka using scoop`)
 
 
-    let out = '';
-    let err = '';
+    // powershell -Command "if (Test-Path('bb.exe')) { return } else { (New-Object Net.WebClient).DownloadFile('https://github.com/borkdude/babashka/releases/download/v0.2.5/babashka-0.2.5-windows-amd64.zip', 'bb.zip') }"
+    // powershell -Command "if (Test-Path('bb.exe')) { return } else { Expand-Archive bb.zip . }"
 
-    const opts = {listeners:
-                     {
-                       stdout: (data: Buffer) => {
-                         out += data.toString();
-                       },
-                       stderr: (data: Buffer) => {
-                         err += data.toString();
-                       }
-                     }
-                    };
 
-    await exec.exec('powershell', ['-command', "Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')", ';',
-                                   'scoop', 'bucket', 'add', 'scoop-clojure', 'https://github.com/littleli/scoop-clojure', ';',
-                                   'scoop', 'bucket', 'add', 'extras', ';',
-                                   'scoop', 'install', 'babashka', '--independent', ';',
-                                   // 'scoop', 'help', ';',
-                                   // 'scoop', 'info', 'babashka', ';',
-                                   'scoop', 'prefix', 'babashka', ';']);
+    await exec.exec('powershell', ['-command', `if (Test-Path('bb.exe')) { return } else { (New-Object Net.WebClient).DownloadFile('https://github.com/babashka/babashka/releases/download/v${version}/babashka-${version}-windows-amd64.zip', 'bb.zip') }`]);
+    await exec.exec('powershell', ['-command', "if (Test-Path('bb.exe')) { return } else { Expand-Archive bb.zip . }"]);
+
+
+    toolPath = await tc.cacheFile(
+      'bb.exe',
+      'bb.exe',
+      'Babashka',
+      version,
+      os.arch())
+
+    // await exec.exec('powershell', ['-command', "Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')", ';',
+    //                                'scoop', 'bucket', 'add', 'scoop-clojure', 'https://github.com/littleli/scoop-clojure', ';',
+    //                                'scoop', 'bucket', 'add', 'extras', ';',
+    //                                'scoop', 'install', 'babashka', '--independent', ';',
+    //                                // 'scoop', 'help', ';',
+    //                                // 'scoop', 'info', 'babashka', ';',
+    //                                'scoop', 'prefix', 'babashka', ';']);
 
     // TODO exact version ?
     //await exec.exec('echo', ['$HOME\\scoop\\shims', '|', 'Out-File', '-FilePath', '$env:GITHUB_PATH', '-Encoding', 'utf-8', '-Append'])
@@ -93,14 +94,12 @@ export async function getBabashka(version: string): Promise<void> {
     // C:\mysql-5.7.21-winx64\bin\echo.exe $HOME\scoop\shims | Out-File -FilePath $env:GITHUB_PATH -Encoding utf-8 -Append
     // $HOME\scoop\shims | Out-File -FilePath $env:GITHUB_PATH -Encoding utf-8 -Append
 
-    const prefix = out.split('\n');
-    core.info(`prefix, ${prefix}`);
 
-    toolPath = await tc.cacheDir(
-      'C:\\Users\\runneradmin\\scoop\\apps\\babashka\\0.3.0',
-      'Babashka',
-      version,
-      os.arch())
+    // toolPath = await tc.cacheDir(
+    //   'C:\\Users\\runneradmin\\scoop\\apps\\babashka\\0.3.0',
+    //   'Babashka',
+    //   version,
+    //   os.arch())
 
     core.info(`babashka setup at ${toolPath}`)
 
