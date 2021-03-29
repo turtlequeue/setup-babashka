@@ -5367,43 +5367,15 @@ function getBabashka(version) {
             yield exec.exec('bash', [installerFile, "--dir", tmpPath, "--version", version]);
             core.info(`babashka installed to ${tmpPath}`);
             toolPath = yield tc.cacheDir(tmpPath, 'Babashka', version, os.arch());
-            core.info(`babashka setup at ${toolPath}`);
-            core.addPath(toolPath);
         }
         else {
             core.info(`Windows detected, setting up babashka using scoop`);
-            // powershell -Command "if (Test-Path('bb.exe')) { return } else { (New-Object Net.WebClient).DownloadFile('https://github.com/borkdude/babashka/releases/download/v0.2.5/babashka-0.2.5-windows-amd64.zip', 'bb.zip') }"
-            // powershell -Command "if (Test-Path('bb.exe')) { return } else { Expand-Archive bb.zip . }"
             yield exec.exec('powershell', ['-command', `if (Test-Path('bb.exe')) { return } else { (New-Object Net.WebClient).DownloadFile('https://github.com/babashka/babashka/releases/download/v${version}/babashka-${version}-windows-amd64.zip', 'bb.zip') }`]);
             yield exec.exec('powershell', ['-command', "if (Test-Path('bb.exe')) { return } else { Expand-Archive bb.zip . }"]);
             toolPath = yield tc.cacheFile('bb.exe', 'bb.exe', 'Babashka', version, os.arch());
-            // await exec.exec('powershell', ['-command', "Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')", ';',
-            //                                'scoop', 'bucket', 'add', 'scoop-clojure', 'https://github.com/littleli/scoop-clojure', ';',
-            //                                'scoop', 'bucket', 'add', 'extras', ';',
-            //                                'scoop', 'install', 'babashka', '--independent', ';',
-            //                                // 'scoop', 'help', ';',
-            //                                // 'scoop', 'info', 'babashka', ';',
-            //                                'scoop', 'prefix', 'babashka', ';']);
-            // TODO exact version ?
-            //await exec.exec('echo', ['$HOME\\scoop\\shims', '|', 'Out-File', '-FilePath', '$env:GITHUB_PATH', '-Encoding', 'utf-8', '-Append'])
-            // https://github.com/littleli/scoop-clojure/blob/f44b1696884a41f92c5dc85381eea4f5e01824b8/bucket/babashka.json#L13
-            // https://github.com/lukesampson/scoop/issues/3951#issuecomment-786858678
-            // Checking hash of babashka-0.3.0-windows-amd64.zip ... ok.
-            //   Extracting babashka-0.3.0-windows-amd64.zip ... done.
-            //   Linking ~\scoop\apps\babashka\current => ~\scoop\apps\babashka\0.3.0
-            // Creating shim for 'bb'.
-            //   'babashka' (0.3.0) was installed successfully!
-            // C:\mysql-5.7.21-winx64\bin\echo.exe $HOME\scoop\shims | Out-File -FilePath $env:GITHUB_PATH -Encoding utf-8 -Append
-            // $HOME\scoop\shims | Out-File -FilePath $env:GITHUB_PATH -Encoding utf-8 -Append
-            // toolPath = await tc.cacheDir(
-            //   'C:\\Users\\runneradmin\\scoop\\apps\\babashka\\0.3.0',
-            //   'Babashka',
-            //   version,
-            //   os.arch())
-            core.info(`babashka setup at ${toolPath}`);
-            core.addPath(toolPath);
-            core.info(`final step`);
         }
+        core.info(`babashka setup at ${toolPath}`);
+        core.addPath(toolPath);
     });
 }
 exports.getBabashka = getBabashka;
