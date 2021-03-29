@@ -1,12 +1,12 @@
 name: 'Setup Babashka - A Clojure babushka for the grey areas of Bash.'
-description: 'Setup your runner with borkdude/babashka'
+description: 'Setup your runner with babashka'
 author: 'nha'
 branding:
   icon: 'bold'
   color: 'green'
 inputs:
   babashka-version:
-    description: 'The borkdude/babashka version to make available on the path. Only exact version allowed.'
+    description: 'The babashka/babashka version to make available on the path. Only exact version allowed.'
     required: true
 runs:
   using: 'node12'

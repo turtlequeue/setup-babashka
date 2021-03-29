@@ -5362,8 +5362,8 @@ function getBabashka(version) {
             const tmpPath = path.join(_getTempDirectory(), uuid_1.v4());
             yield io.mkdirP(tmpPath);
             core.info('temporary directory ' + tmpPath);
-            const installerFile = yield tc.downloadTool("https://raw.githubusercontent.com/borkdude/babashka/master/install");
-            core.info('INSTALLER FILE ' + installerFile);
+            const installerFile = yield tc.downloadTool("https://raw.githubusercontent.com/babashka/babashka/master/install");
+            core.info(`Downloaded installer file ${installerFile}`);
             yield exec.exec('bash', [installerFile, "--dir", tmpPath, "--version", version]);
             core.info(`babashka installed to ${tmpPath}`);
             toolPath = yield tc.cacheDir(tmpPath, 'Babashka', version, os.arch());
