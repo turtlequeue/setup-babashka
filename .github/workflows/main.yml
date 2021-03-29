@@ -8,9 +8,9 @@ jobs:
     # runs-on: windows-latest
     steps:
       - name: Setup Babashka
-        uses: turtlequeue/setup-babashka@main
+        uses: turtlequeue/setup-babashka@feature/support-windows
         with:
-          babashka-version: 0.2.3
+          babashka-version: 0.3.0
 
       - name: Check bb runs
         run: bb --version

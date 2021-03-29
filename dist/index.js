@@ -5346,7 +5346,7 @@ function getBabashka(version) {
     return __awaiter(this, void 0, void 0, function* () {
         let toolPath = tc.find('Babashka', version, os.arch());
         const allBabashkaVersions = tc.findAllVersions('Babashka');
-        if (allBabashkaVersions.length) {
+        if (allBabashkaVersions.length != 0) {
             core.info(`No versions of babashka are available yet`);
         }
         else {
@@ -5371,13 +5371,25 @@ function getBabashka(version) {
             core.addPath(toolPath);
         }
         else {
-            // windows - PR welcome
-            // https://scoop.sh/
-            // https://github.com/littleli/scoop-clojure
-            core.info(`Windows not supported, PR welcome. Installing using https://github.com/littleli/scoop-clojure should be possible.`);
-            throw (new Error("Windows not supported, PR welcome. Installing using https://github.com/littleli/scoop-clojure should be possible."));
-            // await exec.exec('iwr', ["-useb", "get.scoop.sh", "|", "iex"])
-            // await exec.exec('scoop', ["install", "babashka"])
+            core.info(`Windows detected, setting up babashka using scoop`);
+            yield exec.exec('powershell', ['-command', "Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')", ';',
+                'scoop', 'bucket', 'add', 'scoop-clojure', 'https://github.com/littleli/scoop-clojure', ';',
+                'scoop', 'bucket', 'add', 'extras', ';',
+                'scoop', 'install', 'babashka', '--independent', ';']);
+            // TODO exact version ?
+            yield exec.exec('echo', ['$HOME\\scoop\\shims', '|', 'Out-File', '-FilePath', '$env:GITHUB_PATH', '-Encoding', 'utf-8', '-Append']);
+            // https://github.com/littleli/scoop-clojure/blob/f44b1696884a41f92c5dc85381eea4f5e01824b8/bucket/babashka.json#L13
+            // Checking hash of babashka-0.3.0-windows-amd64.zip ... ok.
+            //   Extracting babashka-0.3.0-windows-amd64.zip ... done.
+            //   Linking ~\scoop\apps\babashka\current => ~\scoop\apps\babashka\0.3.0
+            // Creating shim for 'bb'.
+            //   'babashka' (0.3.0) was installed successfully!
+            // C:\mysql-5.7.21-winx64\bin\echo.exe $HOME\scoop\shims | Out-File -FilePath $env:GITHUB_PATH -Encoding utf-8 -Append
+            // $HOME\scoop\shims | Out-File -FilePath $env:GITHUB_PATH -Encoding utf-8 -Append
+            toolPath = yield tc.cacheDir('~\\scoop\\shims\\', 'Babashka', version, os.arch());
+            core.info(`babashka setup at ${toolPath}`);
+            core.addPath(toolPath);
+            core.info(`final step`);
         }
     });
 }
