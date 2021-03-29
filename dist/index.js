@@ -5389,11 +5389,7 @@ function getBabashka(version) {
             //   'babashka' (0.3.0) was installed successfully!
             // C:\mysql-5.7.21-winx64\bin\echo.exe $HOME\scoop\shims | Out-File -FilePath $env:GITHUB_PATH -Encoding utf-8 -Append
             // $HOME\scoop\shims | Out-File -FilePath $env:GITHUB_PATH -Encoding utf-8 -Append
-            // toolPath = await tc.cacheDir(
-            //   '~\\scoop\\shims\\',
-            //   'Babashka',
-            //   version,
-            //   os.arch())
+            toolPath = yield tc.cacheDir('C:\\Users\\runneradmin\\scoop\\apps\\babashka\\0.3.0', 'Babashka', version, os.arch());
             core.info(`babashka setup at ${toolPath}`);
             core.addPath(toolPath);
             core.info(`final step`);
