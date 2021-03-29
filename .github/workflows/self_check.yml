@@ -7,7 +7,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, ubuntu-18.04, macos-latest]
+        os: [ubuntu-latest, ubuntu-18.04, macos-latest, windows-latest]
         babashka-version: [0.2.3, 0.2.12, 0.3.0]
     steps:
       - name: Setup Babashka
@@ -17,4 +17,13 @@ jobs:
           babashka-version: ${{ matrix.babashka-version }}
 
       - name: Check if bb runs fine
+        run: bb --version
+
+      - name: Setup Babashka from cache
+        id: setup-babashka-2
+        uses: turtlequeue/setup-babashka@main
+        with:
+          babashka-version: ${{ matrix.babashka-version }}
+
+      - name: Check if bb runs fine from cache
         run: bb --version

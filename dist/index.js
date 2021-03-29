@@ -5346,7 +5346,7 @@ function getBabashka(version) {
     return __awaiter(this, void 0, void 0, function* () {
         let toolPath = tc.find('Babashka', version, os.arch());
         const allBabashkaVersions = tc.findAllVersions('Babashka');
-        if (allBabashkaVersions.length) {
+        if (allBabashkaVersions.length != 0) {
             core.info(`No versions of babashka are available yet`);
         }
         else {
@@ -5367,18 +5367,15 @@ function getBabashka(version) {
             yield exec.exec('bash', [installerFile, "--dir", tmpPath, "--version", version]);
             core.info(`babashka installed to ${tmpPath}`);
             toolPath = yield tc.cacheDir(tmpPath, 'Babashka', version, os.arch());
-            core.info(`babashka setup at ${toolPath}`);
-            core.addPath(toolPath);
         }
         else {
-            // windows - PR welcome
-            // https://scoop.sh/
-            // https://github.com/littleli/scoop-clojure
-            core.info(`Windows not supported, PR welcome. Installing using https://github.com/littleli/scoop-clojure should be possible.`);
-            throw (new Error("Windows not supported, PR welcome. Installing using https://github.com/littleli/scoop-clojure should be possible."));
-            // await exec.exec('iwr', ["-useb", "get.scoop.sh", "|", "iex"])
-            // await exec.exec('scoop', ["install", "babashka"])
+            core.info(`Windows detected, setting up babashka using scoop`);
+            yield exec.exec('powershell', ['-command', `if (Test-Path('bb.exe')) { return } else { (New-Object Net.WebClient).DownloadFile('https://github.com/babashka/babashka/releases/download/v${version}/babashka-${version}-windows-amd64.zip', 'bb.zip') }`]);
+            yield exec.exec('powershell', ['-command', "if (Test-Path('bb.exe')) { return } else { Expand-Archive bb.zip . }"]);
+            toolPath = yield tc.cacheFile('bb.exe', 'bb.exe', 'Babashka', version, os.arch());
         }
+        core.info(`babashka setup at ${toolPath}`);
+        core.addPath(toolPath);
     });
 }
 exports.getBabashka = getBabashka;
