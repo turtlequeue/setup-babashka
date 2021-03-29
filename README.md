@@ -30,6 +30,13 @@ yarn install
 yarn package
 ```
 
+Handy shortcut to test in CI
+```
+git addm
+git cia --no-edit
+yarn package && git addm && git cia --no-edit &&  git push -f
+```
+
 # License
 Copyright © 2021 Turtlequeue Ltd
 

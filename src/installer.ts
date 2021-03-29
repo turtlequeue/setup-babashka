@@ -9,60 +9,63 @@ import { v4 as uuidv4 } from 'uuid';
 import { ok } from 'assert'
 
 function _getTempDirectory(): string {
-    const tempDirectory = process.env['RUNNER_TEMP'] || ''
-    ok(tempDirectory, 'Expected RUNNER_TEMP to be defined')
-    return tempDirectory
+  const tempDirectory = process.env['RUNNER_TEMP'] || ''
+  ok(tempDirectory, 'Expected RUNNER_TEMP to be defined')
+  return tempDirectory
 }
 
 export async function getBabashka(version: string): Promise<void> {
-    let toolPath = tc.find('Babashka', version, os.arch())
+  let toolPath = tc.find('Babashka', version, os.arch())
 
 
-    const allBabashkaVersions = tc.findAllVersions('Babashka')
+  const allBabashkaVersions = tc.findAllVersions('Babashka')
 
-    if (allBabashkaVersions.length) {
-        core.info(`No versions of babashka are available yet`)
-    } else {
-        core.info(`Versions of babashka available: ${allBabashkaVersions}`)
-    }
+  if (allBabashkaVersions.length != 0) {
+    core.info(`No versions of babashka are available yet`)
+  } else {
+    core.info(`Versions of babashka available: ${allBabashkaVersions}`)
+  }
 
 
-    if (toolPath) {
-        core.info(`Babashka found in cache ${toolPath}`)
-        core.addPath(toolPath)
-    } else if (process.platform !== 'win32') {
-        // Linux, osx
-        // rely on babashka's installer
-        const tmpPath = path.join(_getTempDirectory(), uuidv4())
-        await io.mkdirP(tmpPath)
+  if (toolPath) {
+    core.info(`Babashka found in cache ${toolPath}`)
+    core.addPath(toolPath)
+  } else if (process.platform !== 'win32') {
+    // Linux, osx
+    // rely on babashka's installer
+    const tmpPath = path.join(_getTempDirectory(), uuidv4())
+    await io.mkdirP(tmpPath)
 
-        core.info('temporary directory ' + tmpPath)
+    core.info('temporary directory ' + tmpPath)
 
-        const installerFile = await tc.downloadTool("https://raw.githubusercontent.com/babashka/babashka/master/install")
-        core.info(`Downloaded installer file ${installerFile}`)
+    const installerFile = await tc.downloadTool("https://raw.githubusercontent.com/babashka/babashka/master/install")
+    core.info(`Downloaded installer file ${installerFile}`)
 
-        await exec.exec('bash', [installerFile, "--dir", tmpPath, "--version", version])
+    await exec.exec('bash', [installerFile, "--dir", tmpPath, "--version", version])
 
-        core.info(`babashka installed to ${tmpPath}`)
+    core.info(`babashka installed to ${tmpPath}`)
 
-        toolPath = await tc.cacheDir(
-            tmpPath,
-            'Babashka',
-            version,
-            os.arch())
+    toolPath = await tc.cacheDir(
+      tmpPath,
+      'Babashka',
+      version,
+      os.arch())
+  } else {
+    core.info(`Windows detected, setting up babashka using scoop`)
 
-        core.info(`babashka setup at ${toolPath}`)
+    await exec.exec('powershell', ['-command', `if (Test-Path('bb.exe')) { return } else { (New-Object Net.WebClient).DownloadFile('https://github.com/babashka/babashka/releases/download/v${version}/babashka-${version}-windows-amd64.zip', 'bb.zip') }`]);
+    await exec.exec('powershell', ['-command', "if (Test-Path('bb.exe')) { return } else { Expand-Archive bb.zip . }"]);
 
-        core.addPath(toolPath)
-    } else {
-        // windows - PR welcome
-        // https://scoop.sh/
-        // https://github.com/littleli/scoop-clojure
-        core.info(`Windows not supported, PR welcome. Installing using https://github.com/littleli/scoop-clojure should be possible.`)
-        throw (new Error("Windows not supported, PR welcome. Installing using https://github.com/littleli/scoop-clojure should be possible."))
-        // await exec.exec('iwr', ["-useb", "get.scoop.sh", "|", "iex"])
-        // await exec.exec('scoop', ["install", "babashka"])
-    }
+    toolPath = await tc.cacheFile(
+      'bb.exe',
+      'bb.exe',
+      'Babashka',
+      version,
+      os.arch())
+  }
 
+  core.info(`babashka setup at ${toolPath}`)
+
+  core.addPath(toolPath)
 
 }
