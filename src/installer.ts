@@ -57,15 +57,31 @@ export async function getBabashka(version: string): Promise<void> {
   } else {
     core.info(`Windows detected, setting up babashka using scoop`)
 
+
+    let out = '';
+    let err = '';
+
+    const opts = {listeners:
+                     {
+                       stdout: (data: Buffer) => {
+                         out += data.toString();
+                       },
+                       stderr: (data: Buffer) => {
+                         err += data.toString();
+                       }
+                     }
+                    };
+
     await exec.exec('powershell', ['-command', "Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')", ';',
                                    'scoop', 'bucket', 'add', 'scoop-clojure', 'https://github.com/littleli/scoop-clojure', ';',
                                    'scoop', 'bucket', 'add', 'extras', ';',
                                    'scoop', 'install', 'babashka', '--independent', ';',
-                                   'scoop', 'help', ';',
-                                   'scoop', 'info', 'babashka', ';',
+                                   // 'scoop', 'help', ';',
+                                   // 'scoop', 'info', 'babashka', ';',
                                    'scoop', 'prefix', 'babashka', ';']);
+
     // TODO exact version ?
-    await exec.exec('echo', ['$HOME\\scoop\\shims', '|', 'Out-File', '-FilePath', '$env:GITHUB_PATH', '-Encoding', 'utf-8', '-Append'])
+    //await exec.exec('echo', ['$HOME\\scoop\\shims', '|', 'Out-File', '-FilePath', '$env:GITHUB_PATH', '-Encoding', 'utf-8', '-Append'])
 
     // https://github.com/littleli/scoop-clojure/blob/f44b1696884a41f92c5dc85381eea4f5e01824b8/bucket/babashka.json#L13
     // https://github.com/lukesampson/scoop/issues/3951#issuecomment-786858678
@@ -76,6 +92,10 @@ export async function getBabashka(version: string): Promise<void> {
     //   'babashka' (0.3.0) was installed successfully!
     // C:\mysql-5.7.21-winx64\bin\echo.exe $HOME\scoop\shims | Out-File -FilePath $env:GITHUB_PATH -Encoding utf-8 -Append
     // $HOME\scoop\shims | Out-File -FilePath $env:GITHUB_PATH -Encoding utf-8 -Append
+
+    const prefix = out.split('\n');
+    core.info(`prefix, ${prefix}`);
+
     toolPath = await tc.cacheDir(
       'C:\\Users\\runneradmin\\scoop\\apps\\babashka\\0.3.0',
       'Babashka',
