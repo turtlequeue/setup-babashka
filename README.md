@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Setup Babashka
-        uses: turtlequeue/setup-babashka@v1.1
+        uses: turtlequeue/setup-babashka@v1.2.0
         with:
           babashka-version: 0.3.0
 

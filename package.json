@@ -1,6 +1,6 @@
 {
   "name": "setup-babashka",
-  "version": "0.0.1",
+  "version": "1.2.0",
   "private": false,
   "description": "setup babashka action",
   "main": "src/setup-babashka.ts",
