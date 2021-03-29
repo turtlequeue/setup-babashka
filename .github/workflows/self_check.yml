@@ -12,7 +12,7 @@ jobs:
     steps:
       - name: Setup Babashka
         id: setup-babashka
-        uses: turtlequeue/setup-babashka@feature/support-windows
+        uses: turtlequeue/setup-babashka@main
         with:
           babashka-version: ${{ matrix.babashka-version }}
 
@@ -21,7 +21,7 @@ jobs:
 
       - name: Setup Babashka from cache
         id: setup-babashka-2
-        uses: turtlequeue/setup-babashka@feature/support-windows
+        uses: turtlequeue/setup-babashka@main
         with:
           babashka-version: ${{ matrix.babashka-version }}
 
