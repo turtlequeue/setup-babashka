@@ -1,6 +1,6 @@
 # setup-babashka
 
-This action sets up Babashka environment for using in GitHub Actions.
+This action sets up [Babashka](https://github.com/babashka/babashka) environment for using in GitHub Actions.
 
 # Usage
 
