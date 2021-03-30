@@ -1,6 +1,7 @@
 # setup-babashka
 
 This action sets up [Babashka](https://github.com/babashka/babashka) environment for using in GitHub Actions.
+So you can use a clojure interpreter in your CI environment.
 
 # Usage
 
@@ -14,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Setup Babashka
-        uses: turtlequeue/setup-babashka@v1.2.0
+        uses: turtlequeue/setup-babashka@v1.2.1
         with:
           babashka-version: 0.3.0
 
@@ -28,13 +29,6 @@ jobs:
 nvm use
 yarn install
 yarn package
-```
-
-Handy shortcut to test in CI
-```
-git addm
-git cia --no-edit
-yarn package && git addm && git cia --no-edit &&  git push -f
 ```
 
 # License

@@ -1486,7 +1486,9 @@ class HttpClient {
                 maxSockets: maxSockets,
                 keepAlive: this._keepAlive,
                 proxy: {
-                    proxyAuth: `${proxyUrl.username}:${proxyUrl.password}`,
+                    ...((proxyUrl.username || proxyUrl.password) && {
+                        proxyAuth: `${proxyUrl.username}:${proxyUrl.password}`
+                    }),
                     host: proxyUrl.hostname,
                     port: proxyUrl.port
                 }
@@ -5369,7 +5371,7 @@ function getBabashka(version) {
             toolPath = yield tc.cacheDir(tmpPath, 'Babashka', version, os.arch());
         }
         else {
-            core.info(`Windows detected, setting up babashka using scoop`);
+            core.info(`Windows detected, setting up bb.exe`);
             yield exec.exec('powershell', ['-command', `if (Test-Path('bb.exe')) { return } else { (New-Object Net.WebClient).DownloadFile('https://github.com/babashka/babashka/releases/download/v${version}/babashka-${version}-windows-amd64.zip', 'bb.zip') }`]);
             yield exec.exec('powershell', ['-command', "if (Test-Path('bb.exe')) { return } else { Expand-Archive bb.zip . }"]);
             toolPath = yield tc.cacheFile('bb.exe', 'bb.exe', 'Babashka', version, os.arch());
