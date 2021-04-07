@@ -8,7 +8,7 @@ jobs:
     # runs-on: windows-latest
     steps:
       - name: Setup Babashka
-        uses: turtlequeue/setup-babashka@feature/support-builds
+        uses: turtlequeue/setup-babashka@feature/main
         with:
           babashka-version: 0.3.0
 
