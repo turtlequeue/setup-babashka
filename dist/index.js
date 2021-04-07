@@ -1677,11 +1677,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
 var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const assert_1 = __webpack_require__(357);
-const fs = __webpack_require__(747);
-const path = __webpack_require__(622);
+const fs = __importStar(__webpack_require__(747));
+const path = __importStar(__webpack_require__(622));
 _a = fs.promises, exports.chmod = _a.chmod, exports.copyFile = _a.copyFile, exports.lstat = _a.lstat, exports.mkdir = _a.mkdir, exports.readdir = _a.readdir, exports.readlink = _a.readlink, exports.rename = _a.rename, exports.rmdir = _a.rmdir, exports.stat = _a.stat, exports.symlink = _a.symlink, exports.unlink = _a.unlink;
 exports.IS_WINDOWS = process.platform === 'win32';
 function exists(fsPath) {
@@ -1879,11 +1886,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const childProcess = __webpack_require__(129);
-const path = __webpack_require__(622);
+const childProcess = __importStar(__webpack_require__(129));
+const path = __importStar(__webpack_require__(622));
 const util_1 = __webpack_require__(669);
-const ioUtil = __webpack_require__(962);
+const ioUtil = __importStar(__webpack_require__(962));
 const exec = util_1.promisify(childProcess.exec);
 /**
  * Copies a file or folder.
@@ -2051,58 +2065,73 @@ function which(tool, check) {
                     throw new Error(`Unable to locate executable file: ${tool}. Please verify either the file path exists or the file can be found within a directory specified by the PATH environment variable. Also check the file mode to verify the file is executable.`);
                 }
             }
+            return result;
         }
-        try {
-            // build the list of extensions to try
-            const extensions = [];
-            if (ioUtil.IS_WINDOWS && process.env.PATHEXT) {
-                for (const extension of process.env.PATHEXT.split(path.delimiter)) {
-                    if (extension) {
-                        extensions.push(extension);
-                    }
-                }
-            }
-            // if it's rooted, return it if exists. otherwise return empty.
-            if (ioUtil.isRooted(tool)) {
-                const filePath = yield ioUtil.tryGetExecutablePath(tool, extensions);
-                if (filePath) {
-                    return filePath;
-                }
-                return '';
-            }
-            // if any path separators, return empty
-            if (tool.includes('/') || (ioUtil.IS_WINDOWS && tool.includes('\\'))) {
-                return '';
-            }
-            // build the list of directories
-            //
-            // Note, technically "where" checks the current directory on Windows. From a toolkit perspective,
-            // it feels like we should not do this. Checking the current directory seems like more of a use
-            // case of a shell, and the which() function exposed by the toolkit should strive for consistency
-            // across platforms.
-            const directories = [];
-            if (process.env.PATH) {
-                for (const p of process.env.PATH.split(path.delimiter)) {
-                    if (p) {
-                        directories.push(p);
-                    }
-                }
-            }
-            // return the first match
-            for (const directory of directories) {
-                const filePath = yield ioUtil.tryGetExecutablePath(directory + path.sep + tool, extensions);
-                if (filePath) {
-                    return filePath;
-                }
-            }
-            return '';
+        const matches = yield findInPath(tool);
+        if (matches && matches.length > 0) {
+            return matches[0];
         }
-        catch (err) {
-            throw new Error(`which failed with message ${err.message}`);
-        }
+        return '';
     });
 }
 exports.which = which;
+/**
+ * Returns a list of all occurrences of the given tool on the system path.
+ *
+ * @returns   Promise<string[]>  the paths of the tool
+ */
+function findInPath(tool) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (!tool) {
+            throw new Error("parameter 'tool' is required");
+        }
+        // build the list of extensions to try
+        const extensions = [];
+        if (ioUtil.IS_WINDOWS && process.env['PATHEXT']) {
+            for (const extension of process.env['PATHEXT'].split(path.delimiter)) {
+                if (extension) {
+                    extensions.push(extension);
+                }
+            }
+        }
+        // if it's rooted, return it if exists. otherwise return empty.
+        if (ioUtil.isRooted(tool)) {
+            const filePath = yield ioUtil.tryGetExecutablePath(tool, extensions);
+            if (filePath) {
+                return [filePath];
+            }
+            return [];
+        }
+        // if any path separators, return empty
+        if (tool.includes(path.sep)) {
+            return [];
+        }
+        // build the list of directories
+        //
+        // Note, technically "where" checks the current directory on Windows. From a toolkit perspective,
+        // it feels like we should not do this. Checking the current directory seems like more of a use
+        // case of a shell, and the which() function exposed by the toolkit should strive for consistency
+        // across platforms.
+        const directories = [];
+        if (process.env.PATH) {
+            for (const p of process.env.PATH.split(path.delimiter)) {
+                if (p) {
+                    directories.push(p);
+                }
+            }
+        }
+        // find all matches
+        const matches = [];
+        for (const directory of directories) {
+            const filePath = yield ioUtil.tryGetExecutablePath(path.join(directory, tool), extensions);
+            if (filePath) {
+                matches.push(filePath);
+            }
+        }
+        return matches;
+    });
+}
+exports.findInPath = findInPath;
 function readCopyOptions(options) {
     const force = options.force == null ? true : options.force;
     const recursive = Boolean(options.recursive);
@@ -5329,6 +5358,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getBabashka = exports.installFromVersion = exports.installFromUrl = void 0;
 const core = __importStar(__webpack_require__(186));
@@ -5339,6 +5371,7 @@ const path = __importStar(__webpack_require__(622));
 const os = __importStar(__webpack_require__(87));
 const uuid_1 = __webpack_require__(552);
 const assert_1 = __webpack_require__(357);
+const fs_1 = __importDefault(__webpack_require__(747));
 function _getTempDirectory() {
     const tempDirectory = process.env['RUNNER_TEMP'] || '';
     assert_1.ok(tempDirectory, 'Expected RUNNER_TEMP to be defined');
@@ -5347,20 +5380,46 @@ function _getTempDirectory() {
 // useful for testing babashka CI snapshot builds
 function installFromUrl(url, version) {
     return __awaiter(this, void 0, void 0, function* () {
-        const finalUrl = url.replace(/\${version}/, version).replace(/\${os}/, os.arch());
-        core.info(`Final URL: ${finalUrl}`);
-        // TODO rename some so it matches?
+        // TODO replaces so that it matches the CI builds
         // https://github.com/babashka/babashka/blob/126d2ff7287c398e488143422c7573337cf580a0/.circleci/script/release#L18
         // https://github.com/babashka/babashka/blob/77daea7362d8e2562c89c315b1fbcefde6fa56a5/appveyor.yml#L63
-        //
-        // os.arch()
-        // 'arm', 'arm64', 'ia32', 'mips', 'mipsel', 'ppc', 'ppc64', 's390', 's390x', 'x32', and 'x64'
-        //
-        // os.platform()
-        //
-        //
-        const toolPath = yield tc.cacheFile('bb', finalUrl, 'Babashka', version, os.arch());
+        // os.arch() os.platform()
+        const downloadURL = url.replace(/\${version}/, version).replace(/\${os}/, os.arch());
+        const dest = "archive.tar.gz";
+        const installerFile = yield tc.downloadTool(downloadURL, dest);
+        core.info(`Downloaded ${downloadURL} in ${installerFile}`);
+        // not a folder?
+        const files = fs_1.default.readdirSync(".");
+        // Error: ENOTDIR: not a directory, scandir '/home/runner/work/_temp/eb0df725-c815-4dff-842a-7a4e3d6d0540'
+        core.info(`Files are ${files}`);
+        let folder;
+        if (url.endsWith('.tar.gz')) {
+            // /usr/bin/tar xz --warning=no-unknown-keyword -C . -f /home/runner/work/_temp/0c9af1c6-ed0f-48a8-9cd3-8bd20e2c234b
+            // Error: sourceFile is not a file
+            folder = yield tc.extractTar(installerFile, '.');
+        }
+        else if (url.endsWith('.zip')) {
+            folder = yield tc.extractZip(installerFile, '.');
+        }
+        else if (url.endsWith('.7z')) {
+            folder = yield tc.extract7z(installerFile, '.');
+        }
+        if (!folder) {
+            core.error(`Unsupported babashka-url ${url}`);
+            core.setFailed("babashka-url format is unknown. Must me .tar.gz, .zip or .7z");
+            return;
+        }
+        // bb should now be just here
+        let executable;
+        if (process.platform !== 'win32') {
+            executable = 'bb';
+        }
+        else {
+            executable = 'bb.exe';
+        }
+        const toolPath = yield tc.cacheFile(folder, executable, 'Babashka', os.arch());
         core.info(`toolpath ${toolPath}`);
+        core.addPath(toolPath);
         return;
     });
 }
@@ -5463,7 +5522,6 @@ function run() {
             const version = core.getInput('babashka-version');
             const url = core.getInput('babashka-url');
             if (isEmptyOrNull(version) && isEmptyOrNull(url)) {
-                //core.error("Input required and not supplied: babashka-version");
                 core.setFailed("Input required and not supplied: babashka-version");
             }
             else {

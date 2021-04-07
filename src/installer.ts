@@ -6,6 +6,8 @@ import * as path from 'path'
 import * as os from 'os'
 import { v4 as uuidv4 } from 'uuid';
 import { ok } from 'assert'
+import fs from 'fs'
+
 
 function _getTempDirectory(): string {
   const tempDirectory = process.env['RUNNER_TEMP'] || ''
@@ -16,30 +18,55 @@ function _getTempDirectory(): string {
 // useful for testing babashka CI snapshot builds
 export async function installFromUrl(url: string, version: string): Promise<void> {
 
-  const finalUrl = url.replace(/\${version}/, version).replace(/\${os}/, os.arch());
-  core.info(`Final URL: ${finalUrl}`)
-  // TODO rename some so it matches?
+  // TODO replaces so that it matches the CI builds
   // https://github.com/babashka/babashka/blob/126d2ff7287c398e488143422c7573337cf580a0/.circleci/script/release#L18
   // https://github.com/babashka/babashka/blob/77daea7362d8e2562c89c315b1fbcefde6fa56a5/appveyor.yml#L63
-  //
-  // os.arch()
-  // 'arm', 'arm64', 'ia32', 'mips', 'mipsel', 'ppc', 'ppc64', 's390', 's390x', 'x32', and 'x64'
-  //
-  // os.platform()
-  //
-  //
-  const installerFile = await tc.downloadTool(finalUrl)
-  core.info(`Downloaded installer zip ${installerFile}`)
+  // os.arch() os.platform()
 
+  const downloadURL = url.replace(/\${version}/, version).replace(/\${os}/, os.arch());
+  const dest = "archive.tar.gz"
+  const installerFile = await tc.downloadTool(downloadURL, dest);
+
+  core.info(`Downloaded ${downloadURL} in ${installerFile}`)
+  // not a folder?
+  const files = fs.readdirSync(".")
+  // Error: ENOTDIR: not a directory, scandir '/home/runner/work/_temp/eb0df725-c815-4dff-842a-7a4e3d6d0540'
+  core.info(`Files are ${files}`)
+
+  let folder;
+  if(url.endsWith('.tar.gz')) {
+    // /usr/bin/tar xz --warning=no-unknown-keyword -C . -f /home/runner/work/_temp/0c9af1c6-ed0f-48a8-9cd3-8bd20e2c234b
+    // Error: sourceFile is not a file
+    folder = await tc.extractTar(installerFile, '.');
+  } else if (url.endsWith('.zip')){
+    folder = await tc.extractZip(installerFile, '.');
+  } else if (url.endsWith('.7z')){
+    folder = await tc.extract7z(installerFile, '.');
+  }
+
+  if(!folder) {
+    core.error(`Unsupported babashka-url ${url}`)
+    core.setFailed("babashka-url format is unknown. Must me .tar.gz, .zip or .7z")
+    return;
+  }
+
+  // bb should now be just here
+  let executable;
+  if(process.platform !== 'win32') {
+     executable = 'bb';
+  } else {
+     executable = 'bb.exe'
+  }
 
   const toolPath = await tc.cacheFile(
-    'bb',
-    finalUrl,
+    folder,
+    executable,
     'Babashka',
-    version,
     os.arch())
 
   core.info(`toolpath ${toolPath}`)
+
+  core.addPath(toolPath)
 
   return;
 }
