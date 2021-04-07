@@ -28,6 +28,10 @@ export async function installFromUrl(url: string, version: string): Promise<void
   // os.platform()
   //
   //
+  const installerFile = await tc.downloadTool(finalUrl)
+  core.info(`Downloaded installer zip ${installerFile}`)
+
+
   const toolPath = await tc.cacheFile(
     'bb',
     finalUrl,

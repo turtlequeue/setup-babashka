@@ -12,7 +12,6 @@ async function run(): Promise<void> {
     const url = core.getInput('babashka-url')
 
     if(isEmptyOrNull(version) && isEmptyOrNull(url)) {
-      //core.error("Input required and not supplied: babashka-version");
       core.setFailed("Input required and not supplied: babashka-version")
     } else {
       await installer.getBabashka(url, version)
