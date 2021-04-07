@@ -9205,7 +9205,7 @@ function installFromUrl(url, version) {
                 const fileSizeInBytes = stats.size;
                 const fileSizeInMegabytes = fileSizeInBytes / (1024 * 1024);
                 core.debug(`File is ${fileSizeInMegabytes}MB, isDir:${stats.isDirectory()}, isFile:${stats.isFile()}`);
-                // archive should be like ~80MB plus - may be an issue otherwise
+                // archive should be like ~20MB (~80MB+ decompressed) - may be an issue otherwise
             }
             else {
                 core.setFailed(`could not download file ${downloadURL}`);
