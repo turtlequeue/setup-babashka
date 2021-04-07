@@ -101,7 +101,7 @@ export async function installFromUrl(url: string, version: string): Promise<void
     executable,
     executable,
     'Babashka',
-    downloadURL,
+    version, // semver, should end with -SNAPSHOT here
     os.arch()
   )
 

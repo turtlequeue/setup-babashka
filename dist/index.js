@@ -9232,7 +9232,8 @@ function installFromUrl(url, version) {
         else {
             executable = 'bb.exe';
         }
-        const toolPath = yield tc.cacheFile(executable, executable, 'Babashka', downloadURL, os.arch());
+        const toolPath = yield tc.cacheFile(executable, executable, 'Babashka', version, // semver, should end with -SNAPSHOT here
+        os.arch());
         core.info(`toolpath ${toolPath}`);
         core.addPath(toolPath);
         return;
@@ -9334,7 +9335,7 @@ function isEmptyOrNull(str) {
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const version = core.getInput('babashka-version');
+            const version = core.getInput('babashka-version', { required: true });
             const url = core.getInput('babashka-url');
             if (isEmptyOrNull(version) && isEmptyOrNull(url)) {
                 core.setFailed("Input required and not supplied: babashka-version");

@@ -14,6 +14,7 @@ jobs:
         id: setup-babashka
         uses: turtlequeue/setup-babashka@feature/support-builds
         with:
+          babashka-version: 0.3.3-SNAPSHOT
           babashka-url: ${{ matrix.babashka-url }}
 
       - name: Check if bb runs fine
@@ -23,6 +24,7 @@ jobs:
         id: setup-babashka-2
         uses: turtlequeue/setup-babashka@feature/support-builds
         with:
+          babashka-version: 0.3.3-SNAPSHOT
           babashka-url: ${{ matrix.babashka-url }}
 
       - name: Check if bb runs fine from cache

@@ -8,7 +8,7 @@ function isEmptyOrNull(str: string|undefined) {
 
 async function run(): Promise<void> {
   try {
-    const version = core.getInput('babashka-version')
+    const version = core.getInput('babashka-version', {required: true})
     const url = core.getInput('babashka-url')
 
     if(isEmptyOrNull(version) && isEmptyOrNull(url)) {
