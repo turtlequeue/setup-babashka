@@ -96,14 +96,14 @@ export async function installFromUrl(url: string, version: string): Promise<void
   } else {
      executable = 'bb.exe'
   }
-  const bbPath = folder + executable;
-  core.info(`Adding tool at path: ${folder}/${executable}, exists: ${fs.existsSync(bbPath)}`);
 
   const toolPath = await tc.cacheFile(
     executable,
     executable,
     'Babashka',
-    os.arch())
+    downloadURL,
+    os.arch()
+  )
 
   core.info(`toolpath ${toolPath}`)
 

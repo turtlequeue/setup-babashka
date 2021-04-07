@@ -9232,9 +9232,7 @@ function installFromUrl(url, version) {
         else {
             executable = 'bb.exe';
         }
-        const bbPath = folder + executable;
-        core.info(`Adding tool at path: ${folder}/${executable}, exists: ${fs_1.default.existsSync(bbPath)}`);
-        const toolPath = yield tc.cacheFile(executable, executable, 'Babashka', os.arch());
+        const toolPath = yield tc.cacheFile(executable, executable, 'Babashka', downloadURL, os.arch());
         core.info(`toolpath ${toolPath}`);
         core.addPath(toolPath);
         return;
