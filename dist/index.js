@@ -9342,20 +9342,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__webpack_require__(2186));
 const installer = __importStar(__webpack_require__(2574));
-function isEmptyOrNull(str) {
-    return (!str || str.length === 0 || str === "");
-}
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const version = core.getInput('babashka-version', { required: true });
             const url = core.getInput('babashka-url');
-            if (isEmptyOrNull(version) && isEmptyOrNull(url)) {
-                core.setFailed("Input required and not supplied: babashka-version");
-            }
-            else {
-                yield installer.getBabashka(url, version);
-            }
+            yield installer.getBabashka(url, version);
         }
         catch (error) {
             core.setFailed(error.message);
