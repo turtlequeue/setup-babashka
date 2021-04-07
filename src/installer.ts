@@ -7,7 +7,27 @@ import * as os from 'os'
 import { v4 as uuidv4 } from 'uuid';
 import { ok } from 'assert'
 import fs from 'fs'
+import * as stream from 'stream';
+import { promisify } from 'util';
+import axios from 'axios';
 
+
+const finished = promisify(stream.finished);
+
+export async function downloadFile(fileURL: string, outputLocationPath: string): Promise<any> {
+  const writer = fs.createWriteStream(outputLocationPath);
+  return axios.get(fileURL, {
+    responseType: 'stream',
+    timeout: 10000
+  }).then(response  => {
+    core.info(`axios response status:${response.status}, redirectCount:${response.request._redirectable._redirectCount}, statusText:${response.statusText}, headers:${JSON.stringify(response.headers)}, config:${JSON.stringify(response.config)}`)
+    response.data.pipe(writer);
+    return finished(writer);
+  }).catch((err :any) => {
+    core.error(`error downloading ${fileURL}, ${err.toJSON()}`)
+    throw(err);
+  })
+}
 
 function _getTempDirectory(): string {
   const tempDirectory = process.env['RUNNER_TEMP'] || ''
@@ -25,9 +45,20 @@ export async function installFromUrl(url: string, version: string): Promise<void
 
   const downloadURL = url.replace(/\${version}/, version).replace(/\${os}/, os.arch());
   const dest = "archive.tar.gz"
-  const installerFile = await tc.downloadTool(downloadURL, dest);
+  //const installerFile = await tc.downloadTool(downloadURL, dest);
+  await downloadFile(downloadURL, dest);
+  if (fs.existsSync(dest)) {
+    core.info(`Downloaded ${downloadURL} in ${dest}`)
+    const stats = fs.statSync(dest)
+    const fileSizeInBytes = stats.size;
+    const fileSizeInMegabytes = fileSizeInBytes / (1024*1024);
+    core.info(`File is ${fileSizeInMegabytes}MB, isDir:${stats.isDirectory()}, isFile:${stats.isFile()}`)
+    // archive should be like ~80MB plus - may be an issue otherwise
+  } else {
+    core.setFailed(`could not download file ${downloadURL}`)
+    return;
+  }
 
-  core.info(`Downloaded ${downloadURL} in ${installerFile}`)
   // not a folder?
   const files = fs.readdirSync(".")
   // Error: ENOTDIR: not a directory, scandir '/home/runner/work/_temp/eb0df725-c815-4dff-842a-7a4e3d6d0540'
@@ -37,18 +68,26 @@ export async function installFromUrl(url: string, version: string): Promise<void
   if(url.endsWith('.tar.gz')) {
     // /usr/bin/tar xz --warning=no-unknown-keyword -C . -f /home/runner/work/_temp/0c9af1c6-ed0f-48a8-9cd3-8bd20e2c234b
     // Error: sourceFile is not a file
-    folder = await tc.extractTar(installerFile, '.');
+    folder = await tc.extractTar(dest, '.');
   } else if (url.endsWith('.zip')){
-    folder = await tc.extractZip(installerFile, '.');
+    folder = await tc.extractZip(dest, '.');
   } else if (url.endsWith('.7z')){
-    folder = await tc.extract7z(installerFile, '.');
+    folder = await tc.extract7z(dest, '.');
   }
 
   if(!folder) {
     core.error(`Unsupported babashka-url ${url}`)
     core.setFailed("babashka-url format is unknown. Must me .tar.gz, .zip or .7z")
     return;
+  } else {
+    const stats = fs.statSync(folder)
+    const fileSizeInBytes = stats.size;
+    const fileSizeInMegabytes = fileSizeInBytes / (1024*1024);
+    core.info(`Extracted folder ${folder} is ${fileSizeInMegabytes}MB, isDir:${stats.isDirectory()}, isFile:${stats.isFile()}`)
+    const extractedFiles = fs.readdirSync(folder)
+    core.info(`Extracted files are ${extractedFiles}`)
   }
+
 
   // bb should now be just here
   let executable;
@@ -57,9 +96,11 @@ export async function installFromUrl(url: string, version: string): Promise<void
   } else {
      executable = 'bb.exe'
   }
+  const bbPath = folder + executable;
+  core.info(`Adding tool at path: ${folder}/${executable}, exists: ${fs.existsSync(bbPath)}`);
 
   const toolPath = await tc.cacheFile(
-    folder,
+    executable,
     executable,
     'Babashka',
     os.arch())

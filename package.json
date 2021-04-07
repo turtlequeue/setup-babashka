@@ -29,6 +29,7 @@
     "@actions/core": "^1.2.6",
     "@actions/exec": "^1.0.4",
     "@actions/tool-cache": "^1.6.1",
+    "axios": "^0.21.1",
     "typescript-formatter": "^7.2.2",
     "uuid": "^8.3.1"
   },
