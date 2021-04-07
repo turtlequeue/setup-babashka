@@ -20,7 +20,7 @@ export async function downloadFile(fileURL: string, outputLocationPath: string):
     responseType: 'stream',
     timeout: 10000
   }).then(response  => {
-    core.info(`axios response status:${response.status}, redirectCount:${response.request._redirectable._redirectCount}, statusText:${response.statusText}, headers:${JSON.stringify(response.headers)}, config:${JSON.stringify(response.config)}`)
+    core.debug(`axios response status:${response.status}, redirectCount:${response.request._redirectable._redirectCount}, statusText:${response.statusText}, headers:${JSON.stringify(response.headers)}, config:${JSON.stringify(response.config)}`)
     response.data.pipe(writer);
     return finished(writer);
   }).catch((err :any) => {
@@ -70,22 +70,18 @@ export async function installFromUrl(url: string, version: string): Promise<void
       const stats = fs.statSync(dest)
       const fileSizeInBytes = stats.size;
       const fileSizeInMegabytes = fileSizeInBytes / (1024*1024);
-      core.info(`File is ${fileSizeInMegabytes}MB, isDir:${stats.isDirectory()}, isFile:${stats.isFile()}`)
+      core.debug(`File is ${fileSizeInMegabytes}MB, isDir:${stats.isDirectory()}, isFile:${stats.isFile()}`)
       // archive should be like ~80MB plus - may be an issue otherwise
     } else {
       core.setFailed(`could not download file ${downloadURL}`)
       return;
     }
 
-    // not a folder?
-    const files = fs.readdirSync(".")
-    // Error: ENOTDIR: not a directory, scandir '/home/runner/work/_temp/eb0df725-c815-4dff-842a-7a4e3d6d0540'
-    core.info(`Files are ${files}`)
+    //const files = fs.readdirSync(".")
+    //ore.debug(`Files are ${files}`)
 
     let folder;
     if(url.endsWith('.tar.gz')) {
-      // /usr/bin/tar xz --warning=no-unknown-keyword -C . -f /home/runner/work/_temp/0c9af1c6-ed0f-48a8-9cd3-8bd20e2c234b
-      // Error: sourceFile is not a file
       folder = await tc.extractTar(dest, '.');
     } else if (url.endsWith('.zip')){
       folder = await tc.extractZip(dest, '.');
@@ -101,9 +97,9 @@ export async function installFromUrl(url: string, version: string): Promise<void
       const stats = fs.statSync(folder)
       const fileSizeInBytes = stats.size;
       const fileSizeInMegabytes = fileSizeInBytes / (1024*1024);
-      core.info(`Extracted folder ${folder} is ${fileSizeInMegabytes}MB, isDir:${stats.isDirectory()}, isFile:${stats.isFile()}`)
+      core.debug(`Extracted folder ${folder} is ${fileSizeInMegabytes}MB, isDir:${stats.isDirectory()}, isFile:${stats.isFile()}`)
       const extractedFiles = fs.readdirSync(folder)
-      core.info(`Extracted files are ${extractedFiles}`)
+      core.debug(`Extracted files are ${extractedFiles}`)
     }
 
     // bb should now be just here
