@@ -13,7 +13,36 @@ function _getTempDirectory(): string {
   return tempDirectory
 }
 
-export async function getBabashka(version: string): Promise<void> {
+// useful for testing babashka CI snapshot builds
+export async function installFromUrl(url: string, version: string): Promise<void> {
+
+  const finalUrl = url.replace(/\${version}/, version).replace(/\${os}/, os.arch());
+  core.info(`Final URL: ${finalUrl}`)
+  // TODO rename some so it matches?
+  // https://github.com/babashka/babashka/blob/126d2ff7287c398e488143422c7573337cf580a0/.circleci/script/release#L18
+  // https://github.com/babashka/babashka/blob/77daea7362d8e2562c89c315b1fbcefde6fa56a5/appveyor.yml#L63
+  //
+  // os.arch()
+  // 'arm', 'arm64', 'ia32', 'mips', 'mipsel', 'ppc', 'ppc64', 's390', 's390x', 'x32', and 'x64'
+  //
+  // os.platform()
+  //
+  //
+  const toolPath = await tc.cacheFile(
+    'bb',
+    finalUrl,
+    'Babashka',
+    version,
+    os.arch())
+
+  core.info(`toolpath ${toolPath}`)
+
+  return;
+}
+
+// the usual way to install
+export async function installFromVersion(version: string): Promise<void>  {
+
   let toolPath = tc.find('Babashka', version, os.arch())
 
 
@@ -66,5 +95,12 @@ export async function getBabashka(version: string): Promise<void> {
   core.info(`babashka setup at ${toolPath}`)
 
   core.addPath(toolPath)
+}
 
+export async function getBabashka(url: string|undefined, version: string): Promise<void> {
+  if(url && url.length) {
+    return installFromUrl(url, version);
+  } else {
+    return installFromVersion(version);
+  }
 }
