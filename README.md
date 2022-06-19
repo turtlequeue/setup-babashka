@@ -17,7 +17,7 @@ jobs:
       - name: Setup Babashka
         uses: turtlequeue/setup-babashka@v1.3.0
         with:
-          babashka-version: 0.5.0
+          babashka-version: 0.8.156
 
       - name: Check bb runs
         run: bb --version
@@ -43,7 +43,9 @@ However this action is useful still for:
 # Use a CI version
 
 You probably don't want to do that.
-But if you do note that:
+Using a CI build of babashka is possible. They can be found on the babashka CI build artefacts or on [appveyor](https://ci.appveyor.com/project/borkdude/babashka) for windows builds.
+
+Keep in mind that:
 - the CI builds from babashka will expire
 - the platform detection is up to you
 
@@ -59,14 +61,15 @@ jobs:
       - name: Setup Babashka
         uses: turtlequeue/setup-babashka@v1.3.0
         with:
-          babashka-version: 0.3.3-SNAPSHOT
-          babashka-url: https://16800-201467090-gh.circle-artifacts.com/0/release/babashka-0.3.3-SNAPSHOT-linux-amd64.tar.gz
+          # this will eventually expire
+          babashka-version: 0.8.157-SNAPSHOT
+          babashka-url: https://29579-201467090-gh.circle-artifacts.com/0/release/babashka-0.8.157-SNAPSHOT-linux-amd64-static.tar.gz
 
       - name: Check bb runs
         run: bb --version
 ```
 
 # License
-Copyright © 2021 Turtlequeue Ltd
+Copyright © 2022 Turtlequeue Ltd
 
 Distributed under the EPL License. See LICENSE.

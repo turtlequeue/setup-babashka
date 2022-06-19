@@ -1,6 +1,13 @@
 import * as core from '@actions/core'
 import * as installer from './installer'
 
+export function assertIsError(error: unknown): asserts error is Error {
+  // https://stackoverflow.com/a/70993058/1327651
+  // GH doesn't seem to have node assert
+  if (!(error instanceof Error)) {
+    throw error
+  }
+}
 async function run(): Promise<void> {
   try {
     const version = core.getInput('babashka-version', {required: true})
@@ -9,6 +16,7 @@ async function run(): Promise<void> {
     await installer.getBabashka(url, version)
 
   } catch (error) {
+    assertIsError(error);
     core.setFailed(error.message)
   }
 }
