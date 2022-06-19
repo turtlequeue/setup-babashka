@@ -100,15 +100,15 @@
   resolved "https://registry.yarnpkg.com/@types/json5/-/json5-0.0.29.tgz#ee28707ae94e11d2b827bcbe5270bcea7f3e71ee"
   integrity sha512-dRLjCWHYg4oaA77cxO64oO+7JwCwnIzkZPdrrC71jQmQtlhM556pwKo5bUzqvZndkVbeFLIIi+9TC40JNF5hNQ==
 
-"@types/node@^14.0.25":
-  version "14.18.21"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-14.18.21.tgz#0155ee46f6be28b2ff0342ca1a9b9fd4468bef41"
-  integrity sha512-x5W9s+8P4XteaxT/jKF0PSb7XEvo5VmqEWgsMlyeY4ZlLK8I6aH6g5TPPyDlLAep+GYf4kefb7HFyc7PAO3m+Q==
+"@types/node@^18.0.0":
+  version "18.0.0"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-18.0.0.tgz#67c7b724e1bcdd7a8821ce0d5ee184d3b4dd525a"
+  integrity sha512-cHlGmko4gWLVI27cGJntjs/Sj8th9aYwplmZFwmmgYQQvL5NUsgVJG7OddLvNfLqYS31KFN0s3qlaD9qCaxACA==
 
-"@types/semver@^6.2.1":
-  version "6.2.3"
-  resolved "https://registry.yarnpkg.com/@types/semver/-/semver-6.2.3.tgz#5798ecf1bec94eaa64db39ee52808ec0693315aa"
-  integrity sha512-KQf+QAMWKMrtBMsB8/24w53tEsxllMj6TuA80TT/5igJalLI/zm0L3oXRbIAl4Ohfc85gyHX/jhMwsVkmhLU4A==
+"@types/semver@^7.3.10":
+  version "7.3.10"
+  resolved "https://registry.yarnpkg.com/@types/semver/-/semver-7.3.10.tgz#5f19ee40cbeff87d916eedc8c2bfe2305d957f73"
+  integrity sha512-zsv3fsC7S84NN6nPK06u79oWgrPVd0NvOyqgghV1haPaFcVxIrP4DLomRwGAXk0ui4HZA7mOcSFL98sMVW9viw==
 
 "@types/uuid@^8.3.0":
   version "8.3.4"
