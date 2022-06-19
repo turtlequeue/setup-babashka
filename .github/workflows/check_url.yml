@@ -8,7 +8,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, ubuntu-18.04]
-        babashka-url: ['https://29579-201467090-gh.circle-artifacts.com/0/release/babashka-0.8.157-SNAPSHOT-linux-amd64-static.tar.gz']
+        babashka-url: ['https://output.circle-artifacts.com/output/job/58e9dcec-1df1-4d3a-9879-c938f2272523/artifacts/0/release/babashka-0.8.157-SNAPSHOT-linux-aarch64-static.tar.gz']
     steps:
       - name: Setup Babashka
         id: setup-babashka
