@@ -1,5 +1,6 @@
 import * as core from '@actions/core'
 import * as installer from './installer'
+import { strict as assert } from 'node:assert';
 
 async function run(): Promise<void> {
   try {
@@ -9,6 +10,7 @@ async function run(): Promise<void> {
     await installer.getBabashka(url, version)
 
   } catch (error) {
+    assert(error instanceof Error);
     core.setFailed(error.message)
   }
 }
