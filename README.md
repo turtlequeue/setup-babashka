@@ -43,7 +43,7 @@ However this action is useful still for:
 # Use a CI version
 
 You probably don't want to do that.
-Using a CI build of babashka is possible. They can be found on the clojurians slack #babashka-circleci-builds channel or on [appveyor](https://ci.appveyor.com/project/borkdude/babashka) for windows builds.
+Using a CI build of babashka is possible. They can be found on the babashka CI build artefacts or on [appveyor](https://ci.appveyor.com/project/borkdude/babashka) for windows builds.
 
 Keep in mind that:
 - the CI builds from babashka will expire
