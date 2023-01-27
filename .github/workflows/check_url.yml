@@ -8,13 +8,13 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, ubuntu-18.04]
-        babashka-url: ['https://output.circle-artifacts.com/output/job/c7e6c7a8-3481-4d52-b66e-556e8e29b85f/artifacts/0/release/babashka-0.8.157-SNAPSHOT-linux-amd64-static.tar.gz']
+        babashka-url: ['https://github.com/babashka/babashka/releases/download/v1.1.172/babashka-1.1.172-linux-amd64-static.tar.gz']
     steps:
       - name: Setup Babashka
         id: setup-babashka
         uses: turtlequeue/setup-babashka@main
         with:
-          babashka-version: 0.8.157-SNAPSHOT
+          babashka-version: 1.1.172
           babashka-url: ${{ matrix.babashka-url }}
 
       - name: Check if bb runs fine
@@ -24,7 +24,7 @@ jobs:
         id: setup-babashka-2
         uses: turtlequeue/setup-babashka@main
         with:
-          babashka-version: 0.8.157-SNAPSHOT
+          babashka-version: 1.1.172
           babashka-url: ${{ matrix.babashka-url }}
 
       - name: Check if bb runs fine from cache
@@ -34,13 +34,13 @@ jobs:
     runs-on: windows-latest
     strategy:
       matrix:
-        babashka-url: ['https://ci.appveyor.com/api/buildjobs/p0hixpbicqgoumam/artifacts/babashka-0.8.157-SNAPSHOT-windows-amd64.zip']
+        babashka-url: ['https://ci.appveyor.com/api/buildjobs/ux0sg55l0fh9px62/artifacts/babashka-1.1.173-SNAPSHOT-windows-amd64.zip']
     steps:
       - name: Setup Babashka
         id: setup-babashka
         uses: turtlequeue/setup-babashka@main
         with:
-          babashka-version: 0.8.157-SNAPSHOT
+          babashka-version: 1.1.173-SNAPSHOT
           babashka-url: ${{ matrix.babashka-url }}
 
       - name: Check if bb runs fine
@@ -50,7 +50,7 @@ jobs:
         id: setup-babashka-2
         uses: turtlequeue/setup-babashka@main
         with:
-          babashka-version: 0.8.157-SNAPSHOT
+          babashka-version: 1.1.173-SNAPSHOT
           babashka-url: ${{ matrix.babashka-url }}
 
       - name: Check if bb runs fine from cache
