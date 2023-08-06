@@ -17,7 +17,7 @@ jobs:
       - name: Setup Babashka
         uses: turtlequeue/setup-babashka@v1.5.0
         with:
-          babashka-version: 0.8.156
+          babashka-version: 1.3.182
 
       - name: Check bb runs
         run: bb --version
