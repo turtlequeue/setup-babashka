@@ -34,7 +34,7 @@ jobs:
     runs-on: windows-latest
     strategy:
       matrix:
-        babashka-url: ['https://ci.appveyor.com/api/buildjobs/ux0sg55l0fh9px62/artifacts/babashka-1.1.173-SNAPSHOT-windows-amd64.zip']
+        babashka-url: ['https://ci.appveyor.com/api/buildjobs/jem1nge8xapaubv6/artifacts/babashka-1.3.183-SNAPSHOT-windows-amd64.zip']
     steps:
       - name: Setup Babashka
         id: setup-babashka
