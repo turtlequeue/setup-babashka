@@ -42,8 +42,10 @@ export async function installFromUrl(
 
   if (toolPath) {
     core.info(`Babashka found in cache ${toolPath}`)
+    core.setOutput('cache-hit', 'true') // for tests
   } else {
     const downloadedFilePath = await downloadFile(url)
+    core.setOutput('cache-hit', 'false') // for tests
 
     if (fs.existsSync(downloadedFilePath)) {
       core.info(`Downloaded ${url} in ${downloadedFilePath}`)
