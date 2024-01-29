@@ -158,6 +158,8 @@ export async function installFromVersion(version: string): Promise<void> {
       "if (Test-Path('bb.exe')) { return } else { Expand-Archive bb.zip . }"
     ])
 
+    core.info("exists? bb.exe", fs.existsSync("bb.exe"))
+
     toolPath = await tc.cacheFile(
       'bb.exe',
       'bb.exe',
