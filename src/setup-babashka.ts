@@ -14,9 +14,8 @@ async function run(): Promise<void> {
     const url = core.getInput('babashka-url')
 
     await installer.getBabashka(url, version)
-
   } catch (error) {
-    assertIsError(error);
+    assertIsError(error)
     core.setFailed(error.message)
   }
 }

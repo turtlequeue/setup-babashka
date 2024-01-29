@@ -11,5 +11,5 @@ inputs:
   babashka-url:
     description: 'The babashka/babashka url to make available on the path. Useful for CI builds. Example https://16810-201467090-gh.circle-artifacts.com/0/release/babashka-0.3.3-SNAPSHOT-linux-amd64.tar.gz When using "babashka-url" the parameter "babashka-version" is still required, to allow for appropriate caching between runs. Example: babashka-version: 0.3.3-SNAPSHOT'
 runs:
-  using: 'node16'
+  using: 'node20'
   main: 'dist/index.js'
