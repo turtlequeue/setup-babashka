@@ -158,10 +158,11 @@ export async function installFromVersion(version: string): Promise<void> {
       "if (Test-Path('bb.exe')) { return } else { Expand-Archive bb.zip . }"
     ])
 
-    core.info("exists? bb.exe", fs.existsSync("bb.exe"))
+    const bbExePath = path.join(process.cwd(), "bb.exe");
+    core.info("exists? bb.exe", fs.existsSync(bbExePath))
 
     toolPath = await tc.cacheFile(
-      'bb.exe',
+      bbExePath,
       'bb.exe',
       'Babashka',
       version,
