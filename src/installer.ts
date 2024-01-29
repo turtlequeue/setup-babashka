@@ -72,17 +72,13 @@ export async function installFromUrl(
 
     if (!folder) {
       core.error(`Unsupported babashka-url ${url}`)
-      core.setFailed(
-        'babashka-url format is unknown. Must me .tar.gz, .zip or .7z'
-      )
+      core.setFailed('babashka-url format is unknown. Must me .tar.gz, .zip or .7z')
       return
     } else {
       const stats = fs.statSync(folder)
       const fileSizeInBytes = stats.size
       const fileSizeInMegabytes = fileSizeInBytes / (1024 * 1024)
-      core.debug(
-        `Extracted folder ${folder} is ${fileSizeInMegabytes}MB, isDir:${stats.isDirectory()}, isFile:${stats.isFile()}`
-      )
+      core.debug(`Extracted folder ${folder} is ${fileSizeInMegabytes}MB, isDir:${stats.isDirectory()}, isFile:${stats.isFile()}`)
       const extractedFiles = fs.readdirSync(folder)
       core.debug(`Extracted files are ${extractedFiles}`)
     }

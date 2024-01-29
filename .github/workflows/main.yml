@@ -14,3 +14,14 @@ jobs:
 
       - name: Check bb runs
         run: bb --version
+
+      - name: Test Cache
+        run: |
+          if [ -z "${{ steps.setup-babashka-1.outputs.cache-hit }}" ]; then
+            echo "Cache-hit output not set in first run. Failing the job."
+            exit 1
+          elif [ "${{ steps.setup-babashka-2.outputs.cache-hit }}" != "true" ]; then
+            echo "Cache not used in the second run. Failing the job."
+            exit 1
+          fi
+        shell: bash
