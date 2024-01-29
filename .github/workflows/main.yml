@@ -3,14 +3,23 @@ name: Main dev test
 on: [push]
 
 jobs:
-  simple:
-    runs-on: ubuntu-latest
-    # runs-on: windows-latest
+  maindevtest:
+    # runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - name: Setup Babashka
-        uses: turtlequeue/setup-babashka@main
+        id: setup-babashka
+        uses: turtlequeue/setup-babashka@feat/cache
         with:
           babashka-version: 1.3.189
 
       - name: Check bb runs
         run: bb --version
+
+      - name: Test Cache
+        run: |
+          if [ -z "${{ steps.setup-babashka.outputs.cache-hit }}" ]; then
+            echo "Cache-hit output not set in first run. Failing the job."
+            exit 1
+           fi
+        shell: bash

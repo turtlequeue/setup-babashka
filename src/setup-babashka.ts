@@ -8,15 +8,16 @@ export function assertIsError(error: unknown): asserts error is Error {
     throw error
   }
 }
+
 async function run(): Promise<void> {
   try {
     const version = core.getInput('babashka-version', {required: true})
     const url = core.getInput('babashka-url')
+    const failOnCacheMiss = core.getInput('fail-on-cache-miss') === 'true';
 
-    await installer.getBabashka(url, version)
-
+    await installer.getBabashka(url, version, failOnCacheMiss)
   } catch (error) {
-    assertIsError(error);
+    assertIsError(error)
     core.setFailed(error.message)
   }
 }
