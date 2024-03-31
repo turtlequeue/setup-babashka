@@ -70,6 +70,9 @@ jobs:
 ```
 
 # License
-Copyright © 2022 Turtlequeue Ltd
+Copyright © 2022-2024 Turtlequeue Ltd
+
+# Contributors
+* [Johan Lindbergh](https://github.com/jlindbergh)
 
 Distributed under the EPL License. See LICENSE.
