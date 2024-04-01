@@ -6,6 +6,7 @@
 nvm use
 yarn install
 yarn package
+nodemon -e ts --exec yarn test
 ```
 
 # Test in CI

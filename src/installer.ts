@@ -4,29 +4,37 @@ import * as io from '@actions/io'
 import * as tc from '@actions/tool-cache'
 import * as path from 'path'
 import * as os from 'os'
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid'
 import { ok } from 'assert'
 import fs from 'fs'
-import * as stream from 'stream';
-import { promisify } from 'util';
-import axios from 'axios';
+import { ToolName, Inputs, Outputs } from './constants'
 
 
-const finished = promisify(stream.finished);
+// Another approach would be to copy the logic from
+// https://raw.githubusercontent.com/babashka/babashka/master/install
+//
+// Pros: easier
+// Cons: need to keep up to date in case the script changes and so might be less reliable. One extra http call.
+//
+// Decision: optimize for reliability, and use the official install script
+//
+// TODO follow general organization of
+// https://github.com/actions/cache/blob/0c45773b623bea8c8e75f6c82b208c3cf94ea4f9/src/restoreImpl.ts#L12
+// https://github.com/actions/toolkit/blob/59e9d284e9f7d2bd1a24d2c2e83f19923caaac30/packages/tool-cache/__tests__/tool-cache.test.ts#L209-L224
+//
 
-export async function downloadFile(fileURL: string, outputLocationPath: string): Promise<any> {
-  const writer = fs.createWriteStream(outputLocationPath);
-  return axios.get(fileURL, {
-    responseType: 'stream',
-    timeout: 10000
-  }).then(response  => {
-    core.debug(`axios response status:${response.status}, redirectCount:${response.request._redirectable._redirectCount}, statusText:${response.statusText}, headers:${JSON.stringify(response.headers)}, config:${JSON.stringify(response.config)}`)
-    response.data.pipe(writer);
-    return finished(writer);
-  }).catch((err :any) => {
-    core.error(`error downloading ${fileURL}, ${err.toJSON()}`)
-    throw(err);
-  })
+
+// exported for tests only
+export async function _downloadFile(fileURL: string): Promise<string> {
+  try {
+    const downloadedPath = await tc.downloadTool(fileURL)
+    core.debug(`Downloaded file from ${fileURL} to ${downloadedPath}`)
+    return downloadedPath
+  } catch (error) {
+    core.error(`Error downloading file from ${fileURL}: ${error}`)
+    core.setFailed(`could not download file ${fileURL}`)
+    throw error
+  }
 }
 
 function _getTempDirectory(): string {
@@ -35,19 +43,12 @@ function _getTempDirectory(): string {
   return tempDirectory
 }
 
-function whereAreTheBabushkas() {
-  const allBabashkaVersions = tc.findAllVersions('Babashka')
-
-  if (allBabashkaVersions.length == 0) {
-    core.info(`No versions of babashka are available yet`)
-  } else {
-    core.info(`Versions of babashka available: ${allBabashkaVersions}`)
-  }
-}
-
 // useful for testing babashka CI snapshot builds
-export async function installFromUrl(url: string, version: string): Promise<void> {
-
+export async function _installFromUrl(
+  url: string,
+  version: string,
+  failOnCacheMiss: boolean = false
+): Promise<void> {
   //
   // TODO replaces so that it matches the CI builds
   // https://github.com/babashka/babashka/blob/126d2ff7287c398e488143422c7573337cf580a0/.circleci/script/release#L18
@@ -55,139 +56,179 @@ export async function installFromUrl(url: string, version: string): Promise<void
   // os.arch() os.platform()
   //
 
-  let toolPath = tc.find('Babashka', version, os.arch())
+  // TODO allow a version like "-1" to skip caching ?
+  const toolPath = tc.find(ToolName, version, os.arch())
+
+
+  if (core.isDebug()) {
+    const allBabashkaVersions = tc.findAllVersions(ToolName)
+    core.debug(`Versions of babashka available: ${allBabashkaVersions}`)
+  }
 
   if (toolPath) {
-    core.info(`Babashka found in cache ${toolPath}`)
+    core.info(`${ToolName} found in cache ${toolPath}`)
+    core.setOutput(Outputs.CacheHit, 'true') // for tests
+    core.addPath(toolPath);
+    return;
   } else {
+    core.info(`${ToolName} not found in cache`)
+    const downloadedFilePath = await _downloadFile(url)
+    core.setOutput(Outputs.CacheHit, 'false') // for tests
 
-    const downloadURL = url.replace(/\${version}/, version).replace(/\${os}/, os.arch());
-    const dest = "archive.tar.gz"
-    //const installerFile = await tc.downloadTool(downloadURL, dest);
-    await downloadFile(downloadURL, dest);
-    if (fs.existsSync(dest)) {
-      core.info(`Downloaded ${downloadURL} in ${dest}`)
-      const stats = fs.statSync(dest)
-      const fileSizeInBytes = stats.size;
-      const fileSizeInMegabytes = fileSizeInBytes / (1024*1024);
-      core.debug(`File is ${fileSizeInMegabytes}MB, isDir:${stats.isDirectory()}, isFile:${stats.isFile()}`)
-      // archive should be like ~20MB (~80MB+ decompressed) - may be an issue otherwise
-    } else {
-      core.setFailed(`could not download file ${downloadURL}`)
+
+    if (failOnCacheMiss) {
+      core.setFailed(`Cache miss for ${ToolName} version ${version} arch ${os.arch()} and failOnCacheMiss is true.`);
       return;
     }
 
-    //const files = fs.readdirSync(".")
-    //ore.debug(`Files are ${files}`)
-
-    let folder;
-    if(url.endsWith('.tar.gz')) {
-      folder = await tc.extractTar(dest, '.');
-    } else if (url.endsWith('.zip')){
-      folder = await tc.extractZip(dest, '.');
-    } else if (url.endsWith('.7z')){
-      folder = await tc.extract7z(dest, '.');
+    if (core.isDebug()) {
+      if (fs.existsSync(downloadedFilePath)) {
+        core.info(`Downloaded ${url} in ${downloadedFilePath}`)
+        const stats = fs.statSync(downloadedFilePath)
+        const fileSizeInBytes = stats.size
+        const fileSizeInMegabytes = fileSizeInBytes / (1024 * 1024)
+        core.debug(`File is ${fileSizeInMegabytes}MB, isDir:${stats.isDirectory()}, isFile:${stats.isFile()}`)
+        // archive should be like ~20MB (~80MB+ decompressed) - may be an issue otherwise
+      }
+      else {
+        core.error(`could not download file ${url}`);
+        return
+      }
     }
 
-    if(!folder) {
+    let folder
+    if (url.endsWith('.tar.gz')) {
+      folder = await tc.extractTar(downloadedFilePath, '.')
+    } else if (url.endsWith('.zip')) {
+      folder = await tc.extractZip(downloadedFilePath, '.')
+    } else if (url.endsWith('.7z')) {
+      folder = await tc.extract7z(downloadedFilePath, '.')
+    }
+
+    if (!folder) {
       core.error(`Unsupported babashka-url ${url}`)
-      core.setFailed("babashka-url format is unknown. Must me .tar.gz, .zip or .7z")
-      return;
+      core.setFailed('babashka-url format is unknown. Must me .tar.gz, .zip or .7z')
+      return
     } else {
       const stats = fs.statSync(folder)
-      const fileSizeInBytes = stats.size;
-      const fileSizeInMegabytes = fileSizeInBytes / (1024*1024);
+      const fileSizeInBytes = stats.size
+      const fileSizeInMegabytes = fileSizeInBytes / (1024 * 1024)
       core.debug(`Extracted folder ${folder} is ${fileSizeInMegabytes}MB, isDir:${stats.isDirectory()}, isFile:${stats.isFile()}`)
       const extractedFiles = fs.readdirSync(folder)
       core.debug(`Extracted files are ${extractedFiles}`)
     }
 
     // bb should now be just here
-    let executable;
-    if(process.platform !== 'win32') {
-      executable = 'bb';
+    let executable
+    if (process.platform !== 'win32') {
+      executable = 'bb'
     } else {
       executable = 'bb.exe'
     }
 
-    toolPath = await tc.cacheFile(
+    const cachedPath = await tc.cacheFile(
       executable,
       executable,
-      'Babashka',
+      ToolName,
       version, // semver, should end with -SNAPSHOT here
       os.arch()
     )
 
+    core.info(`cachedPath ${cachedPath}`)
     core.info(`toolpath ${toolPath}`)
+    core.addPath(cachedPath)
   }
 
   core.addPath(toolPath)
 
-  return;
+  return
 }
 
 // the usual way to install
-export async function installFromVersion(version: string): Promise<void>  {
+export async function _installFromVersion(version: string, failOnCacheMiss: boolean = false): Promise<void> {
+  let toolPath = tc.find(ToolName, version, os.arch())
 
-  let toolPath = tc.find('Babashka', version, os.arch())
-
-  const allBabashkaVersions = tc.findAllVersions('Babashka')
-
-  if (allBabashkaVersions.length != 0) {
-    core.info(`Versions of babashka available: ${allBabashkaVersions}`)
-  } else {
-    core.info(`No versions of babashka are available yet`)
+  if (core.isDebug()) {
+    const allBabashkaVersions = tc.findAllVersions(ToolName)
+    core.debug(`Versions of babashka available: ${allBabashkaVersions}`)
   }
-
 
   if (toolPath) {
-    core.info(`Babashka found in cache ${toolPath}`)
-  } else if (process.platform !== 'win32') {
-    // Linux, osx
-    // rely on babashka's installer
-    const tmpPath = path.join(_getTempDirectory(), uuidv4())
-    await io.mkdirP(tmpPath)
-
-    core.info('temporary directory ' + tmpPath)
-
-    const installerFile = await tc.downloadTool("https://raw.githubusercontent.com/babashka/babashka/master/install")
-    core.info(`Downloaded installer file ${installerFile}`)
-
-    await exec.exec('bash', [installerFile, "--dir", tmpPath, "--version", version])
-
-    core.info(`babashka installed to ${tmpPath}`)
-
-    toolPath = await tc.cacheDir(
-      tmpPath,
-      'Babashka',
-      version,
-      os.arch())
+    core.info(`${ToolName} found in cache ${toolPath}`)
+    core.setOutput(Outputs.CacheHit, 'true') // for tests
+    core.addPath(toolPath);
+    return;
   } else {
-    core.info(`Windows detected, setting up bb.exe`)
+    core.info(`${ToolName} not found in cache`)
+    core.setOutput(Outputs.CacheHit, 'false') // for tests
 
-    await exec.exec('powershell', ['-command', `if (Test-Path('bb.exe')) { return } else { (New-Object Net.WebClient).DownloadFile('https://github.com/babashka/babashka/releases/download/v${version}/babashka-${version}-windows-amd64.zip', 'bb.zip') }`]);
-    await exec.exec('powershell', ['-command', "if (Test-Path('bb.exe')) { return } else { Expand-Archive bb.zip . }"]);
+    if (failOnCacheMiss) {
+      core.setFailed(`Cache miss for ${ToolName} version ${version} arch ${os.arch()} and ${Inputs.FailOnCacheMiss} is true.`);
+      return;
+    }
 
-    toolPath = await tc.cacheFile(
-      'bb.exe',
-      'bb.exe',
-      'Babashka',
-      version,
-      os.arch())
+    if (process.platform !== 'win32') {
+      // Linux, macOS: rely on babashka's bash installer
+      const tmpPath = path.join(_getTempDirectory(), uuidv4())
+      await io.mkdirP(tmpPath)
+
+      core.info(`temporary directory ${tmpPath}`)
+
+      const installerFile = await _downloadFile('https://raw.githubusercontent.com/babashka/babashka/master/install')
+      core.info(`Downloaded installer file ${installerFile}`)
+
+      core.startGroup('master_script');
+      await exec.exec('bash', [
+        installerFile,
+        '--dir',
+        tmpPath,
+        '--version',
+        version
+      ])
+      core.endGroup();
+
+      core.info(`babashka installed to ${tmpPath}`)
+
+      toolPath = await tc.cacheDir(tmpPath, ToolName, version, os.arch())
+    }
+    else {
+      // Windows: rely on a known url and powershell extraction
+      core.info(`Windows detected, setting up bb.exe`)
+
+      await exec.exec('powershell', [
+        '-command',
+        `if (Test-Path('bb.exe')) { return } else { (New-Object Net.WebClient).DownloadFile('https://github.com/babashka/babashka/releases/download/v${version}/babashka-${version}-windows-amd64.zip', 'bb.zip') }`
+      ])
+      await exec.exec('powershell', [
+        '-command',
+        "if (Test-Path('bb.exe')) { return } else { Expand-Archive bb.zip . }"
+      ])
+
+      const bbExePath = path.join(process.cwd(), "bb.exe");
+
+      core.info(`exists? bb.exe ${fs.existsSync(bbExePath)}`);
+      toolPath = await tc.cacheFile(
+        bbExePath,
+        'bb.exe',
+        ToolName,
+        version,
+        os.arch()
+      )
+    }
+
+    core.addPath(toolPath)
+    core.info(`babashka setup at ${toolPath}`)
   }
-
-  core.info(`babashka setup at ${toolPath}`)
-
-  core.addPath(toolPath)
 }
 
-export async function getBabashka(url: string|undefined, version: string): Promise<void> {
-
-  whereAreTheBabushkas()
-
-  if(url && url.length) {
-    return installFromUrl(url, version);
+export async function getBabashka(
+  url: string | undefined,
+  version: string,
+  failOnCacheMiss: boolean
+): Promise<void> {
+  if (url && url.length) {
+    return _installFromUrl(url, version, failOnCacheMiss)
   } else {
-    return installFromVersion(version);
+    return _installFromVersion(version, failOnCacheMiss)
   }
 }

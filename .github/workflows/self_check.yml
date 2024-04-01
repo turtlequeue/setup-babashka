@@ -7,11 +7,11 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, ubuntu-20.04, macos-latest, windows-latest]
-        babashka-version: [0.5.0, 1.1.172, 1.3.189]
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        babashka-version: [1.1.172, 1.3.189]
     steps:
       - name: Setup Babashka
-        id: setup-babashka
+        id: setup-babashka-1
         uses: turtlequeue/setup-babashka@main
         with:
           babashka-version: ${{ matrix.babashka-version }}
@@ -24,6 +24,18 @@ jobs:
         uses: turtlequeue/setup-babashka@main
         with:
           babashka-version: ${{ matrix.babashka-version }}
+          fail-on-cache-miss: true
 
       - name: Check if bb runs fine from cache
         run: bb --version
+
+      - name: Test Cache
+        run: |
+          if [ -z "${{ steps.setup-babashka-1.outputs.cache-hit }}" ]; then
+            echo "Cache-hit output not set in first run. Failing the job."
+            exit 1
+          elif [ "${{ steps.setup-babashka-2.outputs.cache-hit }}" != "true" ]; then
+            echo "Cache not used in the second run. Failing the job."
+            exit 1
+          fi
+        shell: bash
