@@ -9,7 +9,7 @@ jobs:
     steps:
       - name: Setup Babashka
         id: setup-babashka
-        uses: turtlequeue/setup-babashka@feat/cache
+        uses: turtlequeue/setup-babashka@main
         with:
           babashka-version: 1.3.189
 

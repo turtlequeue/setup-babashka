@@ -11,7 +11,7 @@ jobs:
 
       - name: Setup Babashka
         id: setup-babashka-1
-        uses: turtlequeue/setup-babashka@feat/cache
+        uses: turtlequeue/setup-babashka@main
         with:
           babashka-version: 1.3.189
 
@@ -20,7 +20,7 @@ jobs:
 
       - name: Setup Babashka from cache
         id: setup-babashka-2
-        uses: turtlequeue/setup-babashka@feat/cache
+        uses: turtlequeue/setup-babashka@main
         with:
           babashka-version: 1.3.189
           fail-on-cache-miss: true
@@ -48,7 +48,7 @@ jobs:
     steps:
       - name: Setup Babashka
         id: setup-babashka-1
-        uses: turtlequeue/setup-babashka@feat/cache
+        uses: turtlequeue/setup-babashka@main
         with:
           babashka-version: 1.3.189
           babashka-url: ${{ matrix.babashka-url }}
@@ -58,7 +58,7 @@ jobs:
 
       - name: Setup Babashka from cache
         id: setup-babashka-2
-        uses: turtlequeue/setup-babashka@feat/cache
+        uses: turtlequeue/setup-babashka@main
         with:
           babashka-version: 1.3.189
           babashka-url: ${{ matrix.babashka-url }}
@@ -87,7 +87,7 @@ jobs:
     steps:
       - name: Setup Babashka
         id: setup-babashka-1
-        uses: turtlequeue/setup-babashka@feat/cache
+        uses: turtlequeue/setup-babashka@main
 
         with:
           babashka-version: 1.3.190-SNAPSHOT
@@ -98,7 +98,7 @@ jobs:
 
       - name: Setup Babashka from cache
         id: setup-babashka-2
-        uses: turtlequeue/setup-babashka@feat/cache
+        uses: turtlequeue/setup-babashka@main
 
         with:
           babashka-version: 1.3.190-SNAPSHOT
