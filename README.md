@@ -73,6 +73,8 @@ jobs:
 Copyright © 2022-2024 Turtlequeue Ltd
 
 # Contributors
+
 * [Johan Lindbergh](https://github.com/jlindbergh)
+* [Nick Pellegrino](https://github.com/nickpell)
 
 Distributed under the EPL License. See LICENSE.
