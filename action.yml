@@ -13,5 +13,5 @@ inputs:
   fail-on-cache-miss:
     description: 'Fail the action run if the result was not returned from the cache. Useful for tests. "true" or false otherwise'
 runs:
-  using: 'node20'
+  using: 'node24'
   main: 'dist/index.js'

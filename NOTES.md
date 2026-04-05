@@ -1,5 +1,23 @@
 # notes for myself
 
+# Use a CI version
+
+You probably don't want to do that.
+Using a CI build of babashka is possible. They can be found on the [babashka GitHub releases](https://github.com/babashka/babashka/releases) page (for stable builds) or as GitHub Actions artifacts on the babashka repo (expire after 90 days).
+
+Keep in mind that:
+- the CI builds from babashka will expire
+- the platform detection is up to you
+
+```yaml
+- name: Setup Babashka
+  uses: turtlequeue/setup-babashka@v1.7.0
+  with:
+    # this will eventually expire
+    babashka-version: 0.8.157-SNAPSHOT
+    babashka-url: https://29579-201467090-gh.circle-artifacts.com/0/release/babashka-0.8.157-SNAPSHOT-linux-amd64-static.tar.gz
+```
+
 # Development
 
 ```bash
