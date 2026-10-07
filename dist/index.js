@@ -29368,12 +29368,12 @@ function _installFromUrl(url_1, version_1) {
         }
         else {
             core.info(`${constants_1.ToolName} not found in cache`);
-            const downloadedFilePath = yield _downloadFile(url);
             core.setOutput(constants_1.Outputs.CacheHit, 'false'); // for tests
             if (failOnCacheMiss) {
                 core.setFailed(`Cache miss for ${constants_1.ToolName} version ${version} arch ${os.arch()} and failOnCacheMiss is true.`);
                 return;
             }
+            const downloadedFilePath = yield _downloadFile(url);
             if (core.isDebug()) {
                 if (fs_1.default.existsSync(downloadedFilePath)) {
                     core.info(`Downloaded ${url} in ${downloadedFilePath}`);
@@ -29425,7 +29425,6 @@ function _installFromUrl(url_1, version_1) {
             core.info(`toolpath ${toolPath}`);
             core.addPath(cachedPath);
         }
-        core.addPath(toolPath);
         return;
     });
 }
@@ -29475,11 +29474,11 @@ function _installFromVersion(version_1) {
                 core.info(`Windows detected, setting up bb.exe`);
                 yield exec.exec('powershell', [
                     '-command',
-                    `if (Test-Path('bb.exe')) { return } else { (New-Object Net.WebClient).DownloadFile('https://github.com/babashka/babashka/releases/download/v${version}/babashka-${version}-windows-amd64.zip', 'bb.zip') }`
+                    `(New-Object Net.WebClient).DownloadFile('https://github.com/babashka/babashka/releases/download/v${version}/babashka-${version}-windows-amd64.zip', 'bb.zip')`
                 ]);
                 yield exec.exec('powershell', [
                     '-command',
-                    "if (Test-Path('bb.exe')) { return } else { Expand-Archive bb.zip . }"
+                    'Expand-Archive -Force bb.zip .'
                 ]);
                 const bbExePath = path.join(process.cwd(), "bb.exe");
                 core.info(`exists? bb.exe ${fs_1.default.existsSync(bbExePath)}`);
