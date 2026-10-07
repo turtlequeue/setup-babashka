@@ -72,14 +72,14 @@ export async function _installFromUrl(
     return;
   } else {
     core.info(`${ToolName} not found in cache`)
-    const downloadedFilePath = await _downloadFile(url)
     core.setOutput(Outputs.CacheHit, 'false') // for tests
-
 
     if (failOnCacheMiss) {
       core.setFailed(`Cache miss for ${ToolName} version ${version} arch ${os.arch()} and failOnCacheMiss is true.`);
       return;
     }
+
+    const downloadedFilePath = await _downloadFile(url)
 
     if (core.isDebug()) {
       if (fs.existsSync(downloadedFilePath)) {
@@ -139,8 +139,6 @@ export async function _installFromUrl(
     core.addPath(cachedPath)
   }
 
-  core.addPath(toolPath)
-
   return
 }
 
@@ -197,11 +195,11 @@ export async function _installFromVersion(version: string, failOnCacheMiss: bool
 
       await exec.exec('powershell', [
         '-command',
-        `if (Test-Path('bb.exe')) { return } else { (New-Object Net.WebClient).DownloadFile('https://github.com/babashka/babashka/releases/download/v${version}/babashka-${version}-windows-amd64.zip', 'bb.zip') }`
+        `(New-Object Net.WebClient).DownloadFile('https://github.com/babashka/babashka/releases/download/v${version}/babashka-${version}-windows-amd64.zip', 'bb.zip')`
       ])
       await exec.exec('powershell', [
         '-command',
-        "if (Test-Path('bb.exe')) { return } else { Expand-Archive bb.zip . }"
+        'Expand-Archive -Force bb.zip .'
       ])
 
       const bbExePath = path.join(process.cwd(), "bb.exe");
